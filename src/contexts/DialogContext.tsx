@@ -8,6 +8,7 @@ import {
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { ConfirmOptions, ConfirmationProps } from "../types";
+import { useComponentOverrides } from "./ComponentOverrideContext";
 import React from "react";
 
 type DialogRequest = ConfirmOptions & {
@@ -33,11 +34,13 @@ export function DialogProvider({
   ConfirmationComponent
 }: DialogProviderProps) {
   const [dialog, setDialog] = useState<DialogRequest | null>(null);
+  const globalComponents = useComponentOverrides();
 
   const confirm = (options: ConfirmOptions) =>
     new Promise<boolean>((resolve) => {
       setDialog({ 
-        ...options, 
+        ...options,
+        components: { ...globalComponents, ...options.components },
         resolve, 
         closable: options.closable ?? true, 
         blur: options.blur ?? false 
@@ -47,7 +50,8 @@ export function DialogProvider({
   const confirmModal = (options: ConfirmOptions) =>
     new Promise<boolean>((resolve) => {
       setDialog({ 
-        ...options, 
+        ...options,
+        components: { ...globalComponents, ...options.components },
         resolve, 
         closable: options.closable ?? false, 
         blur: options.blur ?? true 
@@ -74,6 +78,7 @@ export function DialogProvider({
           cancelText={dialog.cancelText}
           closable={dialog.closable}
           blur={dialog.blur}
+          components={dialog.components}
           onConfirm={() => close(true)}
           onCancel={() => close(false)}
         />

@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { ConfirmationProps } from "../types";
 import React from "react";
+import { Button } from "./base";
 
 interface ConfirmationComponentProps extends ConfirmationProps {
   children?: ReactNode;
@@ -20,8 +21,10 @@ export function Confirmation({
   onCancel,
   closable = true,
   blur = false,
+  components,
   children
 }: ConfirmationComponentProps) {
+  const ButtonComponent = components?.Button || Button;
   return (
     <div
       style={{
@@ -64,31 +67,12 @@ export function Confirmation({
         {children}
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: "8px 16px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
+          <ButtonComponent onClick={onCancel} variant="secondary">
             {cancelText}
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-              backgroundColor: "#007bff",
-              color: "white",
-              cursor: "pointer"
-            }}
-          >
+          </ButtonComponent>
+          <ButtonComponent onClick={onConfirm} variant="primary">
             {confirmText}
-          </button>
+          </ButtonComponent>
         </div>
       </div>
     </div>

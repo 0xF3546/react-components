@@ -1,5 +1,6 @@
 import React, { useState, ReactNode } from "react";
 import { InputDialogProps, InputField as InputFieldType } from "../types";
+import { Button, Input, Textarea, Select, Checkbox } from "./base";
 
 interface InputDialogComponentProps extends InputDialogProps {
   children?: ReactNode;
@@ -20,8 +21,14 @@ export function InputDialog({
   onCancel,
   closable = true,
   blur = false,
+  components,
   children
 }: InputDialogComponentProps) {
+  const ButtonComponent = components?.Button || Button;
+  const InputComponent = components?.Input || Input;
+  const TextareaComponent = components?.Textarea || Textarea;
+  const SelectComponent = components?.Select || Select;
+  const CheckboxComponent = components?.Checkbox || Checkbox;
   const [values, setValues] = useState<Record<string, any>>(() => {
     const initial: Record<string, any> = {};
     fields.forEach(field => {
@@ -84,19 +91,13 @@ export function InputDialog({
       name: field.name,
       placeholder: field.placeholder,
       required: field.required,
-      style: {
-        width: '100%',
-        padding: '8px',
-        border: `1px solid ${error ? '#f44336' : '#ddd'}`,
-        borderRadius: '4px',
-        fontSize: '14px'
-      }
+      error: !!error
     };
 
     switch (field.type) {
       case 'textarea':
         return (
-          <textarea
+          <TextareaComponent
             {...commonProps}
             value={value}
             onChange={(e) => handleChange(field.name, e.target.value, field)}
@@ -106,7 +107,7 @@ export function InputDialog({
       
       case 'select':
         return (
-          <select
+          <SelectComponent
             {...commonProps}
             value={value}
             onChange={(e) => handleChange(field.name, e.target.value, field)}
@@ -122,26 +123,22 @@ export function InputDialog({
                 </option>
               );
             })}
-          </select>
+          </SelectComponent>
         );
       
       case 'checkbox':
         return (
-          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              name={field.name}
-              checked={value}
-              onChange={(e) => handleChange(field.name, e.target.checked, field)}
-              style={{ marginRight: '8px' }}
-            />
-            {field.label}
-          </label>
+          <CheckboxComponent
+            name={field.name}
+            label={field.label}
+            checked={value}
+            onChange={(e) => handleChange(field.name, e.target.checked, field)}
+          />
         );
       
       default:
         return (
-          <input
+          <InputComponent
             {...commonProps}
             type={field.type || 'text'}
             value={value}
@@ -240,25 +237,9 @@ export function InputDialog({
                 backgroundColor: "white",
                 cursor: "pointer"
               }}
-            >
+            >ButtonComponent type="button" onClick={onCancel} variant="secondary">
               {cancelText}
-            </button>
-            <button
-              type="submit"
-              style={{
-                padding: "8px 16px",
-                border: "none",
-                borderRadius: "4px",
-                backgroundColor: "#007bff",
-                color: "white",
-                cursor: "pointer"
-              }}
-            >
+            </ButtonComponent>
+            <ButtonComponent type="submit" variant="primary">
               {confirmText}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+            </ButtonComponent

@@ -1,4 +1,15 @@
+import { ComponentType } from "react";
+import { ButtonProps, InputProps, TextareaProps, SelectProps, CheckboxProps } from "../components/base";
+
 export type InputFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'textarea' | 'select' | 'checkbox';
+
+export interface InputComponentOverrides {
+  Button?: ComponentType<ButtonProps>;
+  Input?: ComponentType<InputProps>;
+  Textarea?: ComponentType<TextareaProps>;
+  Select?: ComponentType<SelectProps>;
+  Checkbox?: ComponentType<CheckboxProps>;
+}
 
 export interface InputField {
   name: string;
@@ -20,6 +31,7 @@ export interface InputOptions {
   cancelText?: string;
   closable?: boolean;
   blur?: boolean;
+  components?: InputComponentOverrides;
 }
 
 export interface InputDialogOptions extends InputOptions {}
