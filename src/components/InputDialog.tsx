@@ -227,19 +227,15 @@ export function InputDialog({
           {children}
 
           <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "24px" }}>
-            <button
-              type="button"
-              onClick={onCancel}
-              style={{
-                padding: "8px 16px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                backgroundColor: "white",
-                cursor: "pointer"
-              }}
-            >ButtonComponent type="button" onClick={onCancel} variant="secondary">
+            <ButtonComponent type="button" onClick={onCancel} variant="secondary">
               {cancelText}
             </ButtonComponent>
             <ButtonComponent type="submit" variant="primary">
               {confirmText}
-            </ButtonComponent
+            </ButtonComponent>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
