@@ -1,5 +1,15 @@
 // Contexts
-export { DialogProvider, useConfirm, useDialog, Dialog, ConfirmDialog } from './contexts';
+export { 
+  DialogProvider, 
+  useConfirm, 
+  useConfirmModal,
+  useDialog, 
+  Dialog, 
+  ConfirmDialog,
+  Modal,
+  ConfirmModal,
+  Confirmation
+} from './contexts';
 
 // Types
-export type { ConfirmOptions, DialogProps } from './types';
+export type { ConfirmOptions, DialogProps, ModalProps, ConfirmationProps } from './types';

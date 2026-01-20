@@ -1,10 +1,24 @@
-# Dialog Context
+# Dialog & Modal Context
 
-A configurable dialog context for React that allows you to programmatically open confirmation dialogs and wait for the user's response.
+A configurable confirmation context for React that provides both dialogs and modals. Use it to programmatically open confirmations and wait for the user's response.
 
 ## Installation
 
 See [Installation Guide](./installation.md)
+
+## Dialog vs Modal
+
+### Dialog
+- **Closable**: Can be dismissed by clicking outside the dialog or pressing Escape
+- **No blur**: Background is darkened but not blurred by default
+- **Use case**: Non-critical confirmations, optional actions
+
+### Modal
+- **Not closable**: Can only be dismissed via buttons
+- **Blur effect**: Background is blurred by default for emphasis
+- **Use case**: Critical actions that require explicit user decision
+
+Both dialogs and modals can have their `closable` and `blur` options customized.
 
 ## Quick Start
 
@@ -59,7 +73,41 @@ function MyComponent() {
 }
 ```
 
-## Basic Example
+### 3. Use Modal
+
+Use `confirmModal` for critical actions:
+
+```tsx
+import { useDialog } from 'react-components';
+
+function MyComponent() {
+  const { confirmModal } = useDialog();
+
+  const handleCriticalAction = async () => {
+    const result = await confirmModal({
+      title: 'Warning',
+      message: 'This will permanently delete your account. This action cannot be undone.',
+      confirmText: 'Delete Account',
+      cancelText: 'Cancel'
+    });
+
+    if (result) {
+      // User confirmed critical action
+      console.log('Account deleted');
+    }
+  };
+
+  return (
+    <button onClick={handleCriticalAction}>
+      Delete Account
+    </button>
+  );
+}
+```
+
+## Basic Examples
+
+### Dialog Example
 
 ```tsx
 import { useDialog } from 'react-components';
@@ -77,8 +125,6 @@ export default function ExampleApp() {
 
     if (result) {
       console.log('User logged out');
-    } else {
-      console.log('Logout cancelled');
     }
   };
 
@@ -86,30 +132,67 @@ export default function ExampleApp() {
 }
 ```
 
+### Modal Example
+
+```tsx
+import { useDialog } from 'react-components';
+
+export default function ExampleApp() {
+  const { confirmModal } = useDialog();
+
+  const handleTerms = async () => {
+    const result = await confirmModal({
+      title: 'Terms of Service',
+      message: 'Please read and accept our terms of service to continue.',
+      confirmText: 'Accept',
+      cancelText: 'Decline'
+    });
+
+    if (result) {
+      console.log('Terms accepted');
+    } else {
+      console.log('Terms declined');
+    }
+  };
+
+  return <button onClick={handleTerms}>Show Terms</button>;
+}
+```
+
 ## API
 
 ### `DialogProvider`
 
-The provider that supplies the dialog context.
+The provider that supplies the confirmation context for both dialogs and modals.
 
 **Props:**
 - `children`: ReactNode (required) - Child components
-- `DialogComponent`: ComponentType<DialogProps> (optional) - Custom dialog component
+- `ConfirmationComponent`: ComponentType<ConfirmationProps> (optional) - Custom confirmation component for both dialogs and modals
 
 ### `useDialog()`
 
-Hook that provides access to dialog functions.
+Hook that provides access to both dialog and modal functions.
 
 **Returns:**
 ```typescript
 {
-  confirm: (options: ConfirmOptions) => Promise<boolean>
+  confirm: (options: ConfirmOptions) => Promise<boolean>;
+  confirmModal: (options: ConfirmOptions) => Promise<boolean>;
 }
 ```
 
 ### `useConfirm()`
 
-Alternative hook that directly returns the `confirm` function.
+Hook that directly returns the `confirm` function (for dialogs).
+
+**Returns:**
+```typescript
+(options: ConfirmOptions) => Promise<boolean>
+```
+
+### `useConfirmModal()`
+
+Hook that directly returns the `confirmModal` function (for modals).
 
 **Returns:**
 ```typescript
@@ -117,51 +200,47 @@ Alternative hook that directly returns the `confirm` function.
 ```
 
 ### `ConfirmOptions`
+Confirmation Component
 
-```typescript
-interface ConfirmOptions {
-  title?: string;        // Dialog title
-  message: string;       // Message/content (required)
-  confirmText?: string;  // Text for confirm button (default: "Confirm")
-  cancelText?: string;   // Text for cancel button (default: "Cancel")
-}
-```
-
-## Custom Dialog Component
-
-You can create and use your own dialog component.
+You can create and use your own confirmation component that will be used for both dialogs and modals.
 
 ### 1. Create Custom Component
 
-Create a component that implements `DialogProps`:
+Create a component that implements `ConfirmationProps`:
 
 ```tsx
-import { DialogProps } from 'react-components';
+import { ConfirmationProps } from 'react-components';
 
-export function MyCustomDialog({
+export function MyCustomConfirmation({
   title,
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
+  closable = true,
+  blur = false,
   onConfirm,
   onCancel
-}: DialogProps) {
+}: ConfirmationProps) {
   return (
-    <div className="my-dialog-overlay" onClick={onCancel}>
-      <div className="my-dialog" onClick={(e) => e.stopPropagation()}>
-        {title && <h2 className="my-dialog-title">{title}</h2>}
+    <div 
+      className="my-confirmation-overlay"
+      style={{ backdropFilter: blur ? 'blur(4px)' : undefined }}
+      onClick={closable ? onCancel : undefined}
+    >
+      <div className="my-confirmation" onClick={(e) => e.stopPropagation()}>
+        {title && <h2 className="my-confirmation-title">{title}</h2>}
         
-        <p className="my-dialog-message">{message}</p>
+        <p className="my-confirmation-message">{message}</p>
 
-        <div className="my-dialog-actions">
+        <div className="my-confirmation-actions">
           <button 
-            className="my-dialog-button-cancel" 
+            className="my-confirmation-button-cancel" 
             onClick={onCancel}
           >
             {cancelText}
           </button>
           <button 
-            className="my-dialog-button-confirm" 
+            className="my-confirmation-button-confirm" 
             onClick={onConfirm}
           >
             {confirmText}
@@ -179,40 +258,58 @@ Pass your component to the `DialogProvider`:
 
 ```tsx
 import { DialogProvider } from 'react-components';
-import { MyCustomDialog } from './MyCustomDialog';
+import { MyCustomConfirmation } from './MyCustomConfirmation';
 
 function App() {
   return (
-    <DialogProvider DialogComponent={MyCustomDialog}>
+    <DialogProvider ConfirmationComponent={MyCustomConfirmation}>
       <YourApp />
     </DialogProvider>
   );
 }
 ```
 
-### Example with Material-UI
+The same component will be used for both `confirm()` and `confirmModal()`, with different `closable` and `blur` props.
+### 2. Use Custom Component
+
+Pass your component to the `DialogProvider`:
 
 ```tsx
-import { DialogProps } from 'react-components';
+import { DialogProvider } from 'react-components';
+import { MyCustomDialog } from './MyCustomDialog';
+
+function App() {
+  return (
+    <DialogProvider DialogComponent={MyCustomDialog}>
+      <YourApp />
+    </DiaConfirmationProps } from 'react-components';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
-  Button
+  Button,
+  Backdrop
 } from '@mui/material';
 
-export function MuiDialog({
+export function MuiConfirmation({
   title,
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
+  closable = true,
+  blur = false,
   onConfirm,
   onCancel
-}: DialogProps) {
+}: ConfirmationProps) {
   return (
-    <Dialog open onClose={onCancel}>
+    <Dialog 
+      open 
+      onClose={closable ? onCancel : undefined}
+      BackdropComponent={blur ? Backdrop : undefined}
+      BackdropProps={blur ? { sx: { backdropFilter: 'blur(4px)' } } : undefined}
+    >
       {title && <DialogTitle>{title}</DialogTitle>}
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>
@@ -232,18 +329,30 @@ Usage:
 
 ```tsx
 import { DialogProvider } from 'react-components';
-import { MuiDialog } from './MuiDialog';
+import { MuiConfirmation } from './MuiConfirmation';
 
 function App() {
   return (
-    <DialogProvider DialogComponent={MuiDialog}>
-      <YourApp />
-    </DialogProvider>
-  );
-}
-```
+    <DialogProvider ConfirmationComponent={MuiConfirmation
 
-### Example with Tailwind CSS
+```tsxConfirmationProps } from 'react-components';
+
+export function TailwindConfirmation({
+  title,
+  message,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  closable = true,
+  blur = false,
+  onConfirm,
+  onCancel
+}: ConfirmationProps) {
+  return (
+    <div 
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${
+        blur ? 'backdrop-blur-sm' : ''
+      }`}
+      onClick={closable ? onCancel : undefinednd CSS
 
 ```tsx
 import { DialogProps } from 'react-components';
@@ -283,24 +392,13 @@ export function TailwindDialog({
           <button 
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             onClick={onConfirm}
-          >
-            {confirmText}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-## Advanced Usage
-
-### Multiple Dialogs in Sequence
+          >Confirmations in Sequence
 
 ```tsx
-const { confirm } = useDialog();
+const { confirm, confirmModal } = useDialog();
 
 const handleComplexAction = async () => {
+  // First: regular dialog
   const step1 = await confirm({
     title: 'Step 1',
     message: 'Do you want to proceed with step 1?'
@@ -308,9 +406,10 @@ const handleComplexAction = async () => {
 
   if (!step1) return;
 
-  const step2 = await confirm({
-    title: 'Step 2',
-    message: 'Continue to step 2?'
+  // Second: modal (requires explicit choice)
+  const step2 = await confirmModal({
+    title: 'Step 2 - Critical',
+    message: 'This is a critical step. Are you sure?'
   });
 
   if (!step2) return;
@@ -319,12 +418,49 @@ const handleComplexAction = async () => {
 };
 ```
 
+### Customizing Blur and Closable
+
+```tsx
+const { confirm, confirmModal } = useDialog();
+
+// Dialog with blur effect
+const showImportantDialog = async () => {
+  await confirm({
+    message: 'Important notification',
+    blur: true  // Override default (false for dialogs)
+  });
+};
+
+// Modal that can be closed by clicking outside
+const showFlexibleModal = async () => {
+  await confirmModal({
+    message: 'Optional modal',
+    closable: true  // Override default (false for modals)
+  });
+};
+```
+
+### With Error Handling
+
+```tsx
+const { confirmModal } = useDialog();
+
+const handleAction = async () => {
+  try {
+    const confirmed = await confirmModal
+  console.log('All steps completed!');
+};
+```
+
 ### With Error Handling
 
 ```tsx
 const { confirm } = useDialog();
-
-const handleAction = async () => {
+useConfirmModal,
+  ConfirmOptions, 
+  ConfirmationProps,
+  DialogProps,
+  ModalPropstion = async () => {
   try {
     const confirmed = await confirm({
       title: 'Dangerous Action',

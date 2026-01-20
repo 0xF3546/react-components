@@ -1,0 +1,1 @@
+export type { ConfirmationProps as ModalProps } from './dialog';
