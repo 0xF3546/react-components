@@ -1,0 +1,39 @@
+{
+  "name": "react-components",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "React utility components and hooks library written in TypeScript.",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "components",
+    "typescript"
+  ],
+  "author": "0xF3546",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=19.0.8"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "^19.0.8",
+    "rollup": "^4.0.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
